@@ -1,3 +1,4 @@
+version: '3'
 services:
   postgres:
     container_name: postgres
@@ -34,6 +35,7 @@ services:
       - "9411:9411"
     networks:
       - spring
+    restart: unless-stopped
   rabbitmq:
     image: rabbitmq:3.9.11-management-alpine
     container_name: rabbitmq
@@ -42,29 +44,32 @@ services:
       - "15672:15672"
     networks:
       - spring
- eureka-server:
-   image: amigoscode/eureka-server:latest
-   container_name: eureka-server
-   ports:
-     - "8761:8761"
-   environment:
-     - SPRING_PROFILES_ACTIVE=docker
-   networks:
-     - spring
-   depends_on:
-     - zipkin
- apigw:
-   image: amigoscode/apigw:latest
-   container_name: apigw
-   ports:
-     - "8083:8083"
-   environment:
-     - SPRING_PROFILES_ACTIVE=docker
-   networks:
-     - spring
-   depends_on:
-     - zipkin
-     - eureka-server
+    restart: unless-stopped
+  eureka-server:
+    image: amigoscode/eureka-server:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - spring
+    depends_on:
+      - zipkin
+    restart: unless-stopped
+  apigw:
+    image: amigoscode/apigw:latest
+    container_name: apigw
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - spring
+    depends_on:
+      - zipkin
+      - eureka-server
+    restart: unless-stopped
   customer:
     image: amigoscode/customer:latest
     container_name: customer
@@ -79,6 +84,7 @@ services:
       - zipkin
       - postgres
       - rabbitmq
+    restart: unless-stopped
   fraud:
     image: amigoscode/fraud:latest
     container_name: fraud
